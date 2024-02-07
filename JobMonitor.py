@@ -3,6 +3,11 @@ from bs4 import BeautifulSoup
 from dotenv import load_dotenv
 import os
 import smtplib
+import email.message
+
+load_dotenv()
+gmail_username = os.getenv('GMAIL_USERNAME')
+app_password = os.getenv('APP_PASSWORD')
 
 companies = [
   { 'name': 'Core Loop', 'url': 'https://coreloop.ai/#careers' },
@@ -19,19 +24,62 @@ companies = [
 
 palavras_chave = ['Concept Artist', 'Artist', '2D', 'Game Designer', 'Prop Artist', 'Character Artist', 'Environment Artist', 'UX Designer', 'UI Designer', 'Level Designer', 'Game Artist', 'Game Art', 'Game Artist', 'Game Art', 'Designer']
 
-load_dotenv()
-username = os.getenv('USERNAME')
-password = os.getenv('PASSWORD')
-port = os.getenv('PORT')
+open_job_list = []
+image_path = "img/me.png"
+
+def assemble_email():
+    email_html = """
+    <html>
+    <head>
+    <style>
+    .job-link {
+        background-color: #4CAF50; /* Green */
+        border: none;
+        color: white;
+        padding: 15px 32px;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 16px;
+        margin: 4px 2px;
+        cursor: pointer;
+    }
+    </style>
+    </head>
+    <body>
+    <p>Alerta de vagas:</p>
+    """
+
+    for job in open_job_list:
+        email_html += f"""
+        <p>Vaga disponível em {job['name']}</p>
+        <a class="job-link" href="{job['url']}">Ver a vaga</a>
+        """
+
+    email_html += """
+    </body>
+    </html>
+    """
+
+    return email_html
 
 def send_email():
-    servidor_email = smtplib.SMTP('smtp.gmail.com', port)
-    servidor_email.starttls()
-    servidor_email.login(username, password)
-    remetente = 'jobservicebot@gmail.com'
-    destinatarios = ['jobservicebot@gmail.com']
-    conteudo = 'Olá, este é um email de teste.'
-    servidor_email.sendmail(remetente, destinatarios, conteudo)
+    email_html = assemble_email()
+
+    msg = email.message.Message()
+    msg['Subject'] = "Teste de Email"
+    msg['From'] = gmail_username
+    msg['To'] = gmail_username
+    password = app_password
+    msg.add_header('Content-Type', 'text/html')
+    msg.set_payload(email_html)
+
+    s = smtplib.SMTP('smtp.gmail.com: 587')
+    s.starttls()
+
+    s.login(msg['From'], password)
+    s.sendmail(msg['From'], [msg['To']], msg.as_string().encode('utf-8'))
+    print('Email enviado')
 
 def search_keywords_in_url(url, palavras_chave):
     response = requests.get(url)
@@ -44,9 +92,11 @@ def search_keywords_in_url(url, palavras_chave):
 
 for company in companies:
     if search_keywords_in_url(company['url'], palavras_chave):
-        send_email()
-        print("ALERTA DE VAGA em " + company['name'] + " no link " + company['url'])
-        # add to a list and send them all in only one report email
-        # send_whatsapp_alert("ALERTA DE VAGA em " + company['name'] + " no link " + company['url'])
+        open_job_list.append(company)
     else:
         print("Palavras-chave não encontradas em " + company['name'] + " no link " + company['url'])
+
+if(len(open_job_list) > 0):
+    send_email()
+else:
+    print("Nenhuma vaga encontrada")
