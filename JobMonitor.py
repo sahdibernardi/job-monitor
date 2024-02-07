@@ -4,6 +4,8 @@ from dotenv import load_dotenv
 import os
 import smtplib
 import email.message
+import re
+import base64
 
 load_dotenv()
 gmail_username = os.getenv('GMAIL_USERNAME')
@@ -28,38 +30,62 @@ open_job_list = []
 image_path = "img/me.png"
 
 def assemble_email():
-    email_html = """
-    <html>
-    <head>
-    <style>
-    .job-link {
-        background-color: #4CAF50; /* Green */
-        border: none;
-        color: white;
-        padding: 15px 32px;
-        text-align: center;
-        text-decoration: none;
-        display: inline-block;
-        font-size: 16px;
-        margin: 4px 2px;
-        cursor: pointer;
-    }
-    </style>
-    </head>
-    <body>
-    <p>Alerta de vagas:</p>
-    """
+    with open("index.html", "r") as file:
+        email_html = file.read()
+
+    insertion_index = email_html.find("<!-- JOB CONTENT -->")
+
+    job_content = ""
 
     for job in open_job_list:
-        email_html += f"""
-        <p>Vaga disponível em {job['name']}</p>
-        <a class="job-link" href="{job['url']}">Ver a vaga</a>
-        """
+        job_content += f"""
+        <table
+            style="font-family:arial,helvetica,sans-serif;"
+            role="presentation" cellpadding="0"
+            cellspacing="0" width="100%"
+            border="0">
+            <tbody>
+                <tr>
+                <td
+                    style="overflow-wrap:break-word;word-break:break-word;padding:27px 27px 10px;font-family:arial,helvetica,sans-serif;"
+                    align="left">
+                    <h1
+                    style="margin: 0px; line-height: 140%; text-align: center; word-wrap: break-word; font-size: 19px; font-weight: 400;">
+                    <span><span><span><strong>Vaga
+                            Aberta na
+                            {job['name']}</strong></span></span></span>
+                    </h1>
+                </td>
+                </tr>
+            </tbody>
+            </table>
 
-    email_html += """
-    </body>
-    </html>
-    """
+            <table
+            style="font-family:arial,helvetica,sans-serif;"
+            role="presentation" cellpadding="0"
+            cellspacing="0" width="100%"
+            border="0">
+            <tbody>
+                <tr>
+                <td
+                    style="overflow-wrap:break-word;word-break:break-word;padding:10px;font-family:arial,helvetica,sans-serif;"
+                    align="left">
+                    <div align="center">
+                    <a href="{job['url']}" target="_blank"
+                        class="v-button"
+                        style="box-sizing: border-box;display: inline-block;text-decoration: none;-webkit-text-size-adjust: none;text-align: center;color: #FFFFFF; border-radius: 4px;-webkit-border-radius: 4px; -moz-border-radius: 4px; width:auto; max-width:100%; overflow-wrap: break-word; word-break: break-word; word-wrap:break-word; mso-border-alt: none;font-size: 14px;
+                        background-image: linear-gradient(to right, #23d1fd, #b524ff);">
+                        <span style="display:block;padding:10px 20px;line-height:120%;">
+                            <span style="line-height: 16.8px;">Clique aqui para ver a vaga!</span>
+                        </span>
+                    </a>
+                </div>
+                </td>
+                </tr>
+            </tbody>
+            </table>
+        """
+    email_html = email_html[:insertion_index] + job_content + email_html[insertion_index:]
 
     return email_html
 
