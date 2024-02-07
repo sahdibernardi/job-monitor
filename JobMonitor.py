@@ -12,16 +12,14 @@ gmail_username = os.getenv('GMAIL_USERNAME')
 app_password = os.getenv('APP_PASSWORD')
 
 companies = [
-  { 'name': 'Core Loop', 'url': 'https://coreloop.ai/#careers' },
-  # { 'name': '', 'url': 'URL_DA_PAGINA_2' },
-  # { 'name': '', 'url': 'URL_DA_PAGINA_3' }
-  # { 'name': '', 'url': 'URL_DA_PAGINA_4' }
-  # { 'name': '', 'url': 'URL_DA_PAGINA_5' }
-  # { 'name': '', 'url': 'URL_DA_PAGINA_6' }
-  # { 'name': '', 'url': 'URL_DA_PAGINA_7' }
-  # { 'name': '', 'url': 'URL_DA_PAGINA_8' }
-  # { 'name': '', 'url': 'URL_DA_PAGINA_9' }
-  # { 'name': '', 'url': 'URL_DA_PAGINA_10' }
+    { 'name': 'Core Loop', 'url': 'https://coreloop.ai/#careers', 'status': 'not applied' },
+    { 'name': 'Core Loop2', 'url': 'https://coreloop.ai/#careers', 'status': 'applied' },
+    # { 'name': '', 'url': 'URL_DA_PAGINA_2', 'status': 'not applied' },
+    # { 'name': '', 'url': 'URL_DA_PAGINA_3', 'status': 'not applied' },
+    # { 'name': '', 'url': 'URL_DA_PAGINA_4', 'status': 'not applied' },
+    # { 'name': '', 'url': 'URL_DA_PAGINA_5', 'status': 'not applied' },
+    # { 'name': '', 'url': 'URL_DA_PAGINA_6', 'status': 'not applied' },
+    # { 'name': '', 'url': 'URL_DA_PAGINA_7', 'status': 'not applied' },
   ]
 
 palavras_chave = ['Concept Artist', 'Artist', '2D', 'Game Designer', 'Prop Artist', 'Character Artist', 'Environment Artist', 'UX Designer', 'UI Designer', 'Level Designer', 'Game Artist', 'Game Art', 'Game Artist', 'Game Art', 'Designer']
@@ -117,7 +115,7 @@ def search_keywords_in_url(url, palavras_chave):
     return False
 
 for company in companies:
-    if search_keywords_in_url(company['url'], palavras_chave):
+    if search_keywords_in_url(company['url'], palavras_chave) and company['status'] == 'not applied':
         open_job_list.append(company)
     else:
         print("Palavras-chave não encontradas em " + company['name'] + " no link " + company['url'])
